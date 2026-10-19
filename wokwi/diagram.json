@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "author": "Thunder Cloud costume",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-pi-pico",
+      "id": "pico",
+      "top": 0,
+      "left": 0,
+      "attrs": { "env": "circuitpython-8.0.2" }
+    },
+    {
+      "type": "wokwi-neopixel-matrix",
+      "id": "cloud",
+      "top": -60,
+      "left": 230,
+      "attrs": { "rows": "6", "cols": "10", "blurLight": "1" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btnThunder",
+      "top": 230,
+      "left": 230,
+      "attrs": { "color": "red", "label": "Thunder (T)", "key": "t", "bounce": "0" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btnRain",
+      "top": 230,
+      "left": 360,
+      "attrs": { "color": "green", "label": "Rain (R)", "key": "r", "bounce": "0" }
+    }
+  ],
+  "connections": [
+    [ "pico:GP0", "$serialMonitor:RX", "", [] ],
+    [ "pico:GP1", "$serialMonitor:TX", "", [] ],
+    [ "pico:GP21", "cloud:DIN", "green", [ "h0" ] ],
+    [ "pico:VBUS", "cloud:VCC", "red", [ "h0" ] ],
+    [ "pico:GND.8", "cloud:GND", "black", [ "h0" ] ],
+    [ "pico:GP19", "btnThunder:1.l", "red", [ "h0" ] ],
+    [ "pico:GND.6", "btnThunder:2.l", "black", [ "h0" ] ],
+    [ "pico:GP26", "btnRain:1.l", "green", [ "h0" ] ],
+    [ "pico:GND.7", "btnRain:2.l", "black", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}

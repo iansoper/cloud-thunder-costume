@@ -1,0 +1,614 @@
+<title>Thunder Cloud Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one night-sky workbench — the cloud stage on the left, the controls panel on the right; stacks on phones. Single dark theme by choice (a storm at night). */
+:root {
+  --bg: #0b0f16;
+  --panel: #131a25;
+  --line: #243044;
+  --fg: #dde5f0;
+  --muted: #8794a8;
+  --bolt: #b9d4ff;
+  --thunder: #e5484d;
+  --thunder-ink: #fff4f4;
+  --rain: #2fae6f;
+  --rain-ink: #f2fff7;
+  --warn: #f0b350;
+  --ok: #57c48a;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+h1 {
+  font: 800 clamp(30px, 5vw, 46px)/1 var(--display);
+  letter-spacing: 0.02em; text-transform: uppercase; margin: 0;
+  text-wrap: balance;
+}
+h1 span { color: var(--bolt); }
+.sub { color: var(--muted); margin: 0; max-width: 62ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.stage {
+  background: radial-gradient(120% 90% at 50% 0%, #121a28 0%, var(--bg) 70%);
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  display: grid; gap: 0;
+}
+canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; }
+.stage-bar {
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-top: 1px solid var(--line);
+  font: 13px/1.4 var(--mono); color: var(--muted);
+}
+.status { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px;
+  font: 500 12px/1.6 var(--mono); color: var(--muted);
+}
+.chip.on-rain { border-color: var(--rain); color: var(--rain); }
+.chip.on-strike { border-color: var(--bolt); color: var(--bolt); }
+.buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+.hw {
+  appearance: none; border: 0; cursor: pointer; border-radius: 50%;
+  width: 84px; height: 84px; font: 700 13px/1.1 var(--body); letter-spacing: 0.04em; text-transform: uppercase;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.28), 0 6px 18px rgba(0,0,0,.45);
+  transition: transform .06s ease, box-shadow .06s ease;
+}
+.hw:active, .hw.pressed { transform: translateY(3px); box-shadow: inset 0 -2px 0 rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.45); }
+.hw:focus-visible { outline: 3px solid var(--bolt); outline-offset: 4px; }
+.hw-thunder { background: var(--thunder); color: var(--thunder-ink); }
+.hw-rain { background: var(--rain); color: var(--rain-ink); }
+.hw small { display: block; font: 500 11px/1.4 var(--mono); opacity: .8; text-transform: none; letter-spacing: 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 18px; min-width: 0; }
+h2 { font: 600 20px/1.1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; margin: 0; color: var(--bolt); }
+.section { display: grid; gap: 10px; min-width: 0; }
+.drop {
+  border: 1.5px dashed var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px;
+  transition: border-color .15s;
+}
+.drop.drag { border-color: var(--bolt); }
+.drop-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.drop-head strong { font-weight: 600; }
+label.file {
+  font: 500 13px/1 var(--body); color: var(--fg); background: #1c2534; border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 12px; cursor: pointer;
+}
+label.file:focus-within { outline: 2px solid var(--bolt); outline-offset: 2px; }
+label.file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+ul.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+ul.files li { display: flex; justify-content: space-between; gap: 10px; font: 12.5px/1.45 var(--mono); min-width: 0; }
+ul.files li .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ok { color: var(--ok); white-space: nowrap; }
+.bad { color: var(--warn); white-space: nowrap; }
+.note { color: var(--muted); font-size: 13px; margin: 0; }
+.storage { font: 12.5px/1.5 var(--mono); color: var(--muted); }
+.meter { height: 6px; background: #1c2534; border-radius: 3px; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .2s; }
+.meter i.over { background: var(--warn); }
+.sliders { display: grid; gap: 10px; }
+.slider { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; }
+.slider label { font: 500 12.5px/1.3 var(--mono); color: var(--fg); }
+.slider output { font: 500 12.5px/1.3 var(--mono); color: var(--bolt); font-variant-numeric: tabular-nums; }
+.slider input { grid-column: 1 / -1; width: 100%; accent-color: var(--bolt); }
+.toggles { display: grid; gap: 8px; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.toggle input { accent-color: var(--bolt); width: 16px; height: 16px; }
+.code {
+  background: #0e141e; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  font: 12.5px/1.55 var(--mono); white-space: pre; overflow-x: auto; margin: 0; color: var(--fg);
+}
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+button.plain {
+  font: 500 13px/1 var(--body); color: var(--fg); background: #1c2534; border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 12px; cursor: pointer;
+}
+button.plain:focus-visible { outline: 2px solid var(--bolt); outline-offset: 2px; }
+.left { display: grid; gap: 20px; min-width: 0; }
+.log {
+  background: #0e141e; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  font: 12.5px/1.55 var(--mono); color: var(--muted); height: 220px; overflow-y: auto; margin: 0; white-space: pre-wrap;
+}
+.log b { color: var(--fg); font-weight: 500; }
+.foot { color: var(--muted); font-size: 13px; max-width: 75ch; }
+@media (prefers-reduced-motion: reduce) { .hw { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Thunder Cloud <span>Preview</span></h1>
+    <p class="sub">Press the buttons to run the costume's strike and rain logic with real sound. Load your own WAV files to hear them and see how the lights will follow them.</p>
+  </header>
+
+  <div class="grid">
+    <div class="left">
+    <div class="stage">
+      <canvas id="cloud" width="960" height="600" aria-label="Simulated cloud with six LED zones"></canvas>
+      <div class="stage-bar">
+        <div class="status">
+          <span class="chip" id="chipRain">Rain off</span>
+          <span class="chip" id="chipStrike">Calm</span>
+          <span class="chip" id="chipSound">Sample sounds</span>
+        </div>
+        <div class="buttons">
+          <button class="hw hw-thunder" id="btnThunder" type="button">Thunder<small>key T</small></button>
+          <button class="hw hw-rain" id="btnRain" type="button">Rain<small>key R</small></button>
+        </div>
+      </div>
+    </div>
+    <pre class="log" id="log" aria-live="polite"></pre>
+    </div>
+
+    <div class="panel">
+      <div class="section">
+        <h2>Your sounds</h2>
+        <div class="drop" id="dropThunder">
+          <div class="drop-head"><strong>Thunder clips</strong>
+            <label class="file">Add WAVs<input id="fileThunder" type="file" accept=".wav,audio/wav,audio/*" multiple></label></div>
+          <ul class="files" id="listThunder"></ul>
+        </div>
+        <div class="drop" id="dropRain">
+          <div class="drop-head"><strong>Rain loops</strong>
+            <label class="file">Add WAVs<input id="fileRain" type="file" accept=".wav,audio/wav,audio/*" multiple></label></div>
+          <ul class="files" id="listRain"></ul>
+        </div>
+        <div class="storage"><span id="storageText"></span><div class="meter"><i id="storageBar"></i></div></div>
+        <p class="note">Files you add replace the samples. They stay in this browser tab and are never uploaded. "Board-ready" means 16-bit mono WAV at 22,050 Hz.</p>
+      </div>
+
+      <div class="section">
+        <h2>Settings</h2>
+        <div class="sliders" id="sliders"></div>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="optReactive" checked> Lights follow the thunder (SOUND_REACTIVE)</label>
+          <label class="toggle"><input type="checkbox" id="optSpeaker"> Small-speaker sound (cuts deep bass like a 3 W speaker)</label>
+          <label class="toggle"><input type="checkbox" id="optLeds"> Show individual LEDs</label>
+        </div>
+        <pre class="code" id="codeOut"></pre>
+        <div class="row"><button class="plain" type="button" id="copyBtn">Copy for code.py</button><span class="note" id="copyMsg"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">This page runs a JavaScript copy of the costume's light logic: the same strike styles, timings, loudness measuring, crack detection and rain ducking as code.py. Colors are shown with brightness scaled the way your eye sees LEDs through fiberfill, so treat it as a close preview, not an exact match. Sound comes from your computer's speakers.</p>
+</div>
+
+<script>
+(() => {
+  // ---------- settings mirrored from code.py ----------
+  const S = {
+    BRIGHTNESS: 0.35, VOLUME: 1.0, RAIN_VOLUME: 0.6, RAIN_DUCK: 0.3,
+    PEAK_LEVEL: 0.6, PEAK_JUMP: 0.2, SYNC_OFFSET_S: 0.0,
+  };
+  const SLIDERS = [
+    ["BRIGHTNESS", 0.05, 1, 0.05, "LED brightness cap"],
+    ["VOLUME", 0, 1, 0.05, "Thunder volume"],
+    ["RAIN_VOLUME", 0, 1, 0.05, "Rain volume"],
+    ["RAIN_DUCK", 0, 1, 0.05, "Rain level during thunder"],
+    ["PEAK_LEVEL", 0.2, 1, 0.05, "Crack loudness"],
+    ["PEAK_JUMP", 0.05, 0.6, 0.05, "Crack suddenness"],
+    ["SYNC_OFFSET_S", 0, 0.3, 0.01, "Light delay (s)"],
+  ];
+  const NUM_ZONES = 6, PER = 10, N = NUM_ZONES * PER;
+  const IDLE = [6, 8, 22], FLASH = [255, 255, 255], DIM = [90, 100, 140];
+  const RUMBLE = [130, 140, 190], DROP = [25, 35, 80], RAIN_DROPS = 3;
+  const ENV_WIN = 0.05, MAX_THUNDER_S = 20, KEEPALIVE_S = 12;
+  const BOARD_SR = 22050;
+
+  // ---------- helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const sleep = (s) => new Promise((r) => setTimeout(r, s * 1000));
+  const uni = (a, b) => a + Math.random() * (b - a);
+  const randint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const now = () => performance.now() / 1000;
+  const blend = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const logEl = $("log");
+  function log(msg) {
+    const t = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    logEl.innerHTML += `<b>${t}</b> ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // ---------- pixels (same model as the strip) ----------
+  const pixels = Array.from({ length: N }, () => IDLE.slice());
+  const fill = (c) => { for (let i = 0; i < N; i++) pixels[i] = c.slice(); };
+  const zoneRange = (z) => Array.from({ length: PER }, (_, k) => z * PER + k);
+  function idle() { fill(IDLE); }
+  function lightZones(zones, color) { fill(IDLE); zones.forEach((z) => zoneRange(z).forEach((p) => (pixels[p] = color.slice()))); }
+  function randomZones(n) {
+    const pool = [...Array(NUM_ZONES).keys()], out = [];
+    for (let i = 0; i < Math.min(n, NUM_ZONES); i++) out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    return out;
+  }
+  function rainFrame() { fill(IDLE); for (let i = 0; i < RAIN_DROPS; i++) pixels[Math.floor(Math.random() * N)] = DROP.slice(); }
+  function rest() { raining ? rainFrame() : idle(); }
+
+  // ---------- clips ----------
+  // clip: { name, mono: Float32Array, sr, env: Uint8Array, bytes, info, ready }
+  let thunderClips = [], rainClips = [], usingSamples = { thunder: true, rain: true };
+
+  function envelope(mono, sr) {
+    const win = Math.max(1, Math.round(sr * ENV_WIN)), levels = [];
+    for (let s = 0; s < mono.length; s += win) {
+      let sum = 0, n = Math.min(win, mono.length - s);
+      for (let i = 0; i < n; i++) { const v = mono[s + i]; sum += v * v; }
+      levels.push(Math.sqrt(sum / n));
+    }
+    const top = Math.max(...levels) || 1;
+    return Uint8Array.from(levels, (v) => Math.floor(255 * v / top));
+  }
+
+  function makeThunder(seconds, cracks, seed) {
+    const sr = BOARD_SR, n = Math.floor(seconds * sr), out = new Float32Array(n);
+    let brown = 0, low = 0, rnd = seed;
+    const r = () => ((rnd = (rnd * 1664525 + 1013904223) >>> 0) / 4294967296) * 2 - 1;
+    for (let i = 0; i < n; i++) {
+      const t = i / sr;
+      brown = brown * 0.985 + r() * 0.15;          // rumbling low noise
+      low = low * 0.6 + r() * 0.4;                 // sharper crackle
+      let amp = 0.16 + 0.07 * Math.sin(t * 2.1 + seed);
+      let crack = 0;
+      for (const c of cracks) if (t >= c && t < c + 2.5) crack = Math.max(crack, Math.exp(-(t - c) * 2.6));
+      if (t > seconds - 1.5) amp *= Math.max(0, (seconds - t) / 1.5);
+      out[i] = brown * (amp + crack * 0.9) * 2.2 + low * crack * 0.45;
+    }
+    return out;
+  }
+  function makeRain(seconds) {
+    const sr = BOARD_SR, n = Math.floor(seconds * sr), out = new Float32Array(n);
+    let lp = 0;
+    for (let i = 0; i < n; i++) {
+      const w = Math.random() * 2 - 1;
+      lp = lp * 0.55 + w * 0.45;
+      out[i] = lp * 0.22 + (Math.random() < 0.0009 ? (Math.random() * 2 - 1) * 0.5 : 0);
+    }
+    return out;
+  }
+  function sampleClip(name, mono) {
+    return { name, mono, sr: BOARD_SR, env: envelope(mono, BOARD_SR), bytes: mono.length * 2 + 44, info: "sample", ready: true };
+  }
+  function loadSamples() {
+    thunderClips = [
+      sampleClip("sample-thunder-1", makeThunder(6, [0.3], 3)),
+      sampleClip("sample-thunder-2", makeThunder(8, [0.2, 2.6], 7)),
+      sampleClip("sample-thunder-3", makeThunder(9, [0.4, 1.1, 4.5], 11)),
+    ];
+    rainClips = [sampleClip("sample-rain", makeRain(10))];
+  }
+
+  function wavInfo(buf) {
+    const dv = new DataView(buf);
+    const tag = (o) => String.fromCharCode(dv.getUint8(o), dv.getUint8(o + 1), dv.getUint8(o + 2), dv.getUint8(o + 3));
+    if (buf.byteLength < 12 || tag(0) !== "RIFF" || tag(8) !== "WAVE") return { ok: false, why: "not a WAV file" };
+    let o = 12;
+    while (o + 8 <= buf.byteLength) {
+      const id = tag(o), size = dv.getUint32(o + 4, true);
+      if (id === "fmt ") {
+        const format = dv.getUint16(o + 8, true), ch = dv.getUint16(o + 10, true);
+        const sr = dv.getUint32(o + 12, true), bits = dv.getUint16(o + 22, true);
+        const issues = [];
+        if (format !== 1) issues.push("not PCM");
+        if (ch !== 1) issues.push(ch === 2 ? "stereo" : ch + " channels");
+        if (sr !== BOARD_SR) issues.push((sr / 1000).toFixed(sr % 1000 ? 1 : 0) + " kHz");
+        if (bits !== 16) issues.push(bits + "-bit");
+        return { ok: issues.length === 0, why: issues.join(", ") };
+      }
+      o += 8 + size + (size & 1);
+    }
+    return { ok: false, why: "no format info" };
+  }
+
+  async function addFiles(files, kind) {
+    const list = kind === "thunder" ? "thunder" : "rain";
+    for (const f of files) {
+      try {
+        const buf = await f.arrayBuffer();
+        const info = f.name.toLowerCase().endsWith(".wav") ? wavInfo(buf) : { ok: false, why: "not a WAV file" };
+        const off = new OfflineAudioContext(1, 1, BOARD_SR);
+        const audio = await off.decodeAudioData(buf.slice(0));
+        const mono = new Float32Array(audio.length);
+        for (let c = 0; c < audio.numberOfChannels; c++) {
+          const d = audio.getChannelData(c);
+          for (let i = 0; i < d.length; i++) mono[i] += d[i] / audio.numberOfChannels;
+        }
+        const clip = { name: f.name, mono, sr: audio.sampleRate, env: envelope(mono, audio.sampleRate), bytes: f.size,
+          info: info.ok ? "ready" : info.why, ready: info.ok };
+        if (usingSamples[list]) { if (list === "thunder") thunderClips = []; else rainClips = []; usingSamples[list] = false; }
+        (list === "thunder" ? thunderClips : rainClips).push(clip);
+        log(`Loaded <b>${esc(f.name)}</b> (${(audio.duration).toFixed(1)} s) ${info.ok ? "board-ready" : "needs converting: " + info.why}`);
+      } catch (e) {
+        log(`Couldn't read <b>${esc(f.name)}</b>. Try exporting it again as a WAV.`);
+      }
+    }
+    if (list === "rain" && raining) { stopRain(); startRain(); }
+    renderLists();
+  }
+
+  function renderLists() {
+    const row = (c) => {
+      const status = c.info === "sample" ? `<span class="ok">sample</span>`
+        : c.ready ? `<span class="ok">board-ready</span>` : `<span class="bad">convert: ${c.info}</span>`;
+      return `<li><span class="n">${esc(c.name)}</span>${status}</li>`;
+    };
+    $("listThunder").innerHTML = thunderClips.map(row).join("");
+    $("listRain").innerHTML = rainClips.map(row).join("");
+    const real = [...thunderClips, ...rainClips].filter((c) => c.info !== "sample");
+    const mb = real.reduce((a, c) => a + c.bytes, 0) / 1e6;
+    const cap = 6;
+    $("storageText").textContent = real.length
+      ? `${mb.toFixed(2)} MB used of about ${cap} MB on the board`
+      : `Board storage: about ${cap} MB for sounds`;
+    const bar = $("storageBar");
+    bar.style.width = Math.min(100, (mb / cap) * 100) + "%";
+    bar.classList.toggle("over", mb > cap);
+    const anyReal = !usingSamples.thunder || !usingSamples.rain;
+    $("chipSound").textContent = anyReal ? "Your sounds" : "Sample sounds";
+  }
+
+  // ---------- audio ----------
+  let ctx = null, master, speakerHP, speakerLP, thunderGain, rainGain, thunderSrc = null, rainSrc = null;
+  let thunderPlaying = false;
+  function ensureAudio() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    speakerHP = ctx.createBiquadFilter(); speakerHP.type = "highpass"; speakerHP.frequency.value = 20;
+    speakerLP = ctx.createBiquadFilter(); speakerLP.type = "lowpass"; speakerLP.frequency.value = 20000;
+    thunderGain = ctx.createGain(); rainGain = ctx.createGain();
+    thunderGain.connect(master); rainGain.connect(master);
+    master.connect(speakerHP); speakerHP.connect(speakerLP); speakerLP.connect(ctx.destination);
+    applySpeaker(); applyLevels();
+  }
+  function bufferFor(clip) {
+    if (!clip.buffer) {
+      const b = ctx.createBuffer(1, clip.mono.length, clip.sr);
+      b.copyToChannel(clip.mono, 0);
+      clip.buffer = b;
+    }
+    return clip.buffer;
+  }
+  function applySpeaker() {
+    if (!ctx) return;
+    const on = $("optSpeaker").checked;
+    speakerHP.frequency.value = on ? 160 : 20;
+    speakerLP.frequency.value = on ? 9000 : 20000;
+  }
+  function applyLevels() {
+    if (!ctx) return;
+    thunderGain.gain.value = S.VOLUME;
+    rainGain.gain.value = S.RAIN_VOLUME * (busy && raining ? S.RAIN_DUCK : 1);
+  }
+  function playThunder() {
+    if (!thunderClips.length) return null;
+    if (thunderSrc) { try { thunderSrc.stop(); } catch (e) {} }
+    const clip = pick(thunderClips);
+    const src = ctx.createBufferSource();
+    src.buffer = bufferFor(clip);
+    src.connect(thunderGain);
+    thunderPlaying = true;
+    src.onended = () => { if (thunderSrc === src) thunderPlaying = false; };
+    src.start();
+    thunderSrc = src;
+    log(`Thunder: <b>${esc(clip.name)}</b>`);
+    return clip;
+  }
+  function startRain() {
+    if (!rainClips.length) { log("No rain loops loaded."); return; }
+    const clip = pick(rainClips);
+    const src = ctx.createBufferSource();
+    src.buffer = bufferFor(clip); src.loop = true; src.connect(rainGain); src.start();
+    rainSrc = src; raining = true; applyLevels();
+    log(`Rain on: <b>${esc(clip.name)}</b> (looping)`);
+  }
+  function stopRain() {
+    if (rainSrc) { try { rainSrc.stop(); } catch (e) {} rainSrc = null; }
+    if (raining) log("Rain off");
+    raining = false;
+  }
+
+  // ---------- strike logic (ported from code.py) ----------
+  let busy = false, raining = false;
+  async function flicker(zones, count, color) {
+    for (let i = 0; i < count; i++) {
+      lightZones(zones, color); await sleep(uni(0.02, 0.06));
+      idle(); await sleep(uni(0.03, 0.12));
+    }
+  }
+  async function followSound(env, focus) {
+    const start = now() + S.SYNC_OFFSET_S, tEnd = start + MAX_THUNDER_S;
+    let prev = 0;
+    while (thunderPlaying && now() < tEnd) {
+      const i = Math.floor((now() - start) / ENV_WIN);
+      if (i >= env.length) break;
+      const level = i >= 0 ? env[i] / 255 : 0;
+      if (level >= S.PEAK_LEVEL && level - prev >= S.PEAK_JUMP) {
+        lightZones(randomZones(randint(1, 2)), FLASH);
+        await sleep(uni(0.03, 0.06));
+      }
+      const shaped = Math.pow(level, 1.5);
+      const outer = blend(IDLE, RUMBLE, shaped * 0.5), inner = blend(IDLE, RUMBLE, shaped);
+      fill(outer);
+      focus.forEach((z) => zoneRange(z).forEach((p) => (pixels[p] = inner.slice())));
+      prev = level;
+      await sleep(0.02);
+    }
+  }
+  async function randomRumble() {
+    const tEnd = now() + MAX_THUNDER_S;
+    while (thunderPlaying && now() < tEnd) {
+      if (Math.random() < 0.15) {
+        lightZones([Math.floor(Math.random() * NUM_ZONES)], DIM);
+        await sleep(uni(0.02, 0.05)); idle();
+      }
+      await sleep(0.08);
+    }
+  }
+  async function strike() {
+    busy = true; setStrikeChip();
+    const style = pick(["single", "single", "jump", "jump", "burst", "sheet"]);
+    let zones = randomZones(1);
+    await flicker(zones, randint(1, 3), DIM);
+    if (style === "single") { lightZones(zones, FLASH); await sleep(uni(0.06, 0.14)); }
+    else if (style === "jump") { zones = randomZones(randint(2, 4)); for (const z of zones) { lightZones([z], FLASH); await sleep(uni(0.04, 0.09)); } }
+    else if (style === "burst") { zones = randomZones(randint(2, 3)); lightZones(zones, FLASH); await sleep(uni(0.08, 0.16)); }
+    else { fill(DIM); zoneRange(zones[0]).forEach((p) => (pixels[p] = FLASH.slice())); await sleep(uni(0.1, 0.2)); }
+    idle(); await sleep(uni(0.05, 0.15));
+    await flicker(zones, randint(1, 3), FLASH);
+    await sleep(uni(0.05, 0.6));
+    applyLevels();                                   // ducks the rain while busy
+    const clip = playThunder();
+    if (clip && $("optReactive").checked) await followSound(clip.env, zones);
+    else await randomRumble();
+    busy = false; applyLevels(); rest(); setStrikeChip();
+    log(`Strike done (${style})`);
+  }
+
+  // ---------- buttons ----------
+  function setStrikeChip() {
+    const c = $("chipStrike"); c.textContent = busy ? "Striking" : "Calm"; c.classList.toggle("on-strike", busy);
+    const r = $("chipRain"); r.textContent = raining ? "Raining" : "Rain off"; r.classList.toggle("on-rain", raining);
+  }
+  function pressThunder() {
+    ensureAudio(); if (ctx.state === "suspended") ctx.resume();
+    if (busy) { log("Thunder press ignored: a strike is still running (same as the board)"); return; }
+    strike();
+  }
+  function pressRain() {
+    ensureAudio(); if (ctx.state === "suspended") ctx.resume();
+    if (busy) { log("Rain press ignored: a strike is still running (same as the board)"); return; }
+    raining ? stopRain() : startRain();
+    rest(); setStrikeChip();
+  }
+  $("btnThunder").addEventListener("click", pressThunder);
+  $("btnRain").addEventListener("click", pressRain);
+  document.addEventListener("keydown", (e) => {
+    if (e.repeat || e.target.matches("input, textarea")) return;
+    const k = e.key.toLowerCase();
+    const btn = k === "t" ? $("btnThunder") : k === "r" ? $("btnRain") : null;
+    if (!btn) return;
+    btn.classList.add("pressed"); setTimeout(() => btn.classList.remove("pressed"), 120);
+    k === "t" ? pressThunder() : pressRain();
+  });
+
+  // idle loops: rain shimmer every 70 ms, distant flicker every 12 s when calm
+  let keepaliveAt = now() + KEEPALIVE_S;
+  setInterval(() => {
+    if (busy) return;
+    if (raining) { rainFrame(); return; }
+    if (now() >= keepaliveAt) {
+      lightZones([Math.floor(Math.random() * NUM_ZONES)], DIM);
+      setTimeout(() => { if (!busy && !raining) idle(); }, 40);
+      keepaliveAt = now() + KEEPALIVE_S;
+    }
+  }, 70);
+
+  // ---------- files ----------
+  function wireDrop(dropId, inputId, kind) {
+    const drop = $(dropId), input = $(inputId);
+    input.addEventListener("change", () => { addFiles([...input.files], kind); input.value = ""; });
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+    drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("drag"); addFiles([...e.dataTransfer.files], kind); });
+  }
+  wireDrop("dropThunder", "fileThunder", "thunder");
+  wireDrop("dropRain", "fileRain", "rain");
+
+  // ---------- settings UI ----------
+  const sliderBox = $("sliders");
+  SLIDERS.forEach(([key, min, max, step, label]) => {
+    const id = "s_" + key;
+    const div = document.createElement("div");
+    div.className = "slider";
+    div.innerHTML = `<label for="${id}">${label} <span style="color:var(--muted)">${key}</span></label><output id="${id}_o"></output>
+      <input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${S[key]}">`;
+    sliderBox.appendChild(div);
+    const input = div.querySelector("input"), out = div.querySelector("output");
+    const show = () => { out.textContent = Number(S[key]).toFixed(2); };
+    input.addEventListener("input", () => { S[key] = parseFloat(input.value); show(); applyLevels(); renderCode(); });
+    show();
+  });
+  $("optSpeaker").addEventListener("change", applySpeaker);
+  $("optReactive").addEventListener("change", renderCode);
+  function renderCode() {
+    const lines = SLIDERS.map(([k]) => `${k.padEnd(14)}= ${Number(S[k]).toFixed(2)}`);
+    lines.push(`${"SOUND_REACTIVE".padEnd(14)}= ${$("optReactive").checked ? "True" : "False"}`);
+    $("codeOut").textContent = lines.join("\n");
+  }
+  $("copyBtn").addEventListener("click", async () => {
+    const text = $("codeOut").textContent;
+    try { await navigator.clipboard.writeText(text); $("copyMsg").textContent = "Copied. Paste over the matching lines in SETTINGS."; }
+    catch (e) {
+      const r = document.createRange(); r.selectNodeContents($("codeOut"));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      $("copyMsg").textContent = "Selected. Press Ctrl+C or Cmd+C to copy.";
+    }
+  });
+
+  // ---------- drawing ----------
+  const cv = $("cloud"), g = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const glow = document.createElement("canvas"); glow.width = W; glow.height = H;
+  const gg = glow.getContext("2d");
+  const ZONES = [[0.27, 0.50], [0.47, 0.36], [0.70, 0.44], [0.33, 0.70], [0.54, 0.64], [0.76, 0.68]];
+  const PUFFS = [[0.20, 0.62, 0.15], [0.33, 0.47, 0.17], [0.50, 0.38, 0.20], [0.68, 0.45, 0.17], [0.81, 0.60, 0.14],
+                 [0.36, 0.69, 0.16], [0.56, 0.66, 0.18], [0.72, 0.70, 0.13], [0.25, 0.72, 0.11]];
+  function cloudPath(ctx2) {
+    ctx2.beginPath();
+    PUFFS.forEach(([x, y, r]) => { ctx2.moveTo(x * W + r * W, y * H); ctx2.arc(x * W, y * H, r * W, 0, Math.PI * 2); });
+  }
+  const perceived = (v) => 255 * Math.pow(Math.min(1, (v * S.BRIGHTNESS) / 255), 0.45);
+  function draw() {
+    g.clearRect(0, 0, W, H);
+    // cloud body
+    g.fillStyle = "#1b2433"; cloudPath(g); g.fill();
+    // diffuse glow per zone, added together, then clipped to the cloud
+    gg.globalCompositeOperation = "source-over"; gg.clearRect(0, 0, W, H);
+    gg.globalCompositeOperation = "lighter";
+    ZONES.forEach(([zx, zy], z) => {
+      let r = 0, gr = 0, b = 0;
+      zoneRange(z).forEach((p) => { r += pixels[p][0]; gr += pixels[p][1]; b += pixels[p][2]; });
+      const c = [perceived(r / PER), perceived(gr / PER), perceived(b / PER)].map(Math.round);
+      const grad = gg.createRadialGradient(zx * W, zy * H, 0, zx * W, zy * H, 0.26 * W);
+      grad.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},0.95)`);
+      grad.addColorStop(0.45, `rgba(${c[0]},${c[1]},${c[2]},0.45)`);
+      grad.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
+      gg.fillStyle = grad; gg.fillRect(0, 0, W, H);
+    });
+    gg.globalCompositeOperation = "destination-in";
+    gg.fillStyle = "#000"; cloudPath(gg); gg.fill();
+    g.globalCompositeOperation = "lighter"; g.drawImage(glow, 0, 0); g.globalCompositeOperation = "source-over";
+    if ($("optLeds").checked) {
+      ZONES.forEach(([zx, zy], z) => {
+        zoneRange(z).forEach((p, k) => {
+          const a = (k / PER) * Math.PI * 2, x = zx * W + Math.cos(a) * 0.045 * W, y = zy * H + Math.sin(a) * 0.045 * W;
+          const c = pixels[p].map(perceived).map(Math.round);
+          g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+          g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill();
+        });
+        g.fillStyle = "rgba(221,229,240,0.55)"; g.font = "500 15px 'IBM Plex Mono', monospace"; g.textAlign = "center";
+        g.fillText("zone " + (z + 1), zx * W, zy * H + 0.075 * W);
+      });
+    }
+    requestAnimationFrame(draw);
+  }
+
+  // ---------- start ----------
+  loadSamples(); renderLists(); renderCode(); setStrikeChip(); idle(); draw();
+  log("Ready. Press <b>Thunder</b> or <b>Rain</b> (or keys T and R). Sample sounds are loaded until you add your own.");
+})();
+</script>

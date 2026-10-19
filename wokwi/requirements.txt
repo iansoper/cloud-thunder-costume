@@ -1,0 +1,2 @@
+# Libraries Wokwi installs into /lib when the simulation starts
+neopixel
