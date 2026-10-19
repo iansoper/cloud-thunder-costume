@@ -1,0 +1,3 @@
+# CircuitPython libraries for code.py (install with: circup install -r requirements.txt)
+neopixel
+adafruit_lis3dh
