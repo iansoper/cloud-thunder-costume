@@ -145,6 +145,10 @@ DIM_FLASH = (90, 100, 140)
 
 KEEPALIVE_S = 12           # faint distant flicker this often (storm atmosphere)
 
+READY_FLASH = True         # flash blue once the sounds are loaded and the cloud is ready
+READY_COLOR = (0, 70, 255)
+READY_FLASHES = 3
+
 SOUND_REACTIVE = True      # lights follow the loudness of the thunder clip
 RUMBLE_COLOR = (130, 140, 190)  # cloud color at the clip's loudest moment
 PEAK_LEVEL = 0.6           # loudness (0–1) that counts as a crack of thunder...
@@ -558,6 +562,18 @@ def blink(color):
         time.sleep(0.25)
 
 
+def ready_flash():
+    """Blue flashes: sounds are loaded and the cloud is ready for button presses."""
+    if not READY_FLASH:
+        return
+    for _ in range(READY_FLASHES):
+        pixels.fill(READY_COLOR)
+        pixels.show()
+        time.sleep(0.15)
+        idle()
+        time.sleep(0.15)
+
+
 def boot_check():
     """Red blinks = no thunder files found; amber blinks = rain button on but no rain files."""
     if not sounds:
@@ -568,6 +584,7 @@ def boot_check():
 
 # ---------------- main loop ----------------
 boot_check()
+ready_flash()
 idle()
 clear_taps()
 ambient_at = next_ambient()
