@@ -23,7 +23,7 @@ Built on the [Adafruit RP2040 Prop-Maker Feather](https://www.adafruit.com/produ
 1. Wire it up following the [build guide](docs/build-guide.md#wiring-diagram).
 2. Install CircuitPython 10.x on the board and copy `neopixel.mpy`, `adafruit_lis3dh.mpy` and `adafruit_bus_device/` into `CIRCUITPY/lib`.
 3. Copy `firmware/code.py` and `firmware/safemode.py` to the root of `CIRCUITPY`.
-4. Copy `audio/sounds/` (and, optionally, `audio/rain/`) to the root of `CIRCUITPY`. Your own clips must be 16-bit mono WAV at 22,050 Hz.
+4. Copy `audio/thunder/` (and, optionally, `audio/rain/`) to the root of `CIRCUITPY`. Your own clips must be 16-bit mono WAV at 22,050 Hz.
 5. Tweak the settings block at the top of `code.py`. Rain is off until `USE_RAIN_BUTTON = True`.
 
 ## Status

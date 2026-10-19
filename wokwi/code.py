@@ -16,7 +16,7 @@
 #   lib/neopixel.mpy
 #   lib/adafruit_lis3dh.mpy
 #   lib/adafruit_bus_device/   (folder)
-#   sounds/*.wav       thunder clips (16-bit, mono, 22050 Hz — every file must match exactly)
+#   thunder/*.wav      thunder clips (16-bit, mono, 22050 Hz — every file must match exactly)
 #   rain/*.wav         optional rain loops, same format
 
 import os
@@ -109,10 +109,10 @@ def _fake_envelope(seconds, cracks):
 
 
 _FAKE_CLIPS = {                                # path: (seconds, crack times)
-    "/sounds/thunder1.wav": (6, (0.3,)),
-    "/sounds/thunder2.wav": (8, (0.2, 2.6)),
-    "/sounds/thunder3.wav": (5, (1.2,)),
-    "/sounds/thunder4.wav": (9, (0.4, 1.1, 4.5)),
+    "/thunder/thunder1.wav": (6, (0.3,)),
+    "/thunder/thunder2.wav": (8, (0.2, 2.6)),
+    "/thunder/thunder3.wav": (5, (1.2,)),
+    "/thunder/thunder4.wav": (9, (0.4, 1.1, 4.5)),
 }
 _FAKE_LENGTH = {p: s for p, (s, c) in _FAKE_CLIPS.items()}
 _FAKE_LENGTH["/rain/rain1.wav"] = 20

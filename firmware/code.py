@@ -12,7 +12,7 @@
 #   lib/neopixel.mpy
 #   lib/adafruit_lis3dh.mpy
 #   lib/adafruit_bus_device/   (folder)
-#   sounds/*.wav       thunder clips (16-bit, mono, 22050 Hz — every file must match exactly)
+#   thunder/*.wav      thunder clips (16-bit, mono, 22050 Hz — every file must match exactly)
 #   rain/*.wav         optional rain loops, same format
 
 import os
@@ -158,7 +158,7 @@ def wav_sample_rate(path):
             f.seek(size + (size & 1), 1)
 
 
-sounds = list_wavs("/sounds")
+sounds = list_wavs("/thunder")
 rain_sounds = list_wavs("/rain") if USE_RAIN_BUTTON else []
 print("Thunder files:", sounds)
 if USE_RAIN_BUTTON:

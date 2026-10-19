@@ -104,10 +104,10 @@ def _fake_envelope(seconds, cracks):
 
 
 _FAKE_CLIPS = {                                # path: (seconds, crack times)
-    "/sounds/thunder1.wav": (6, (0.3,)),
-    "/sounds/thunder2.wav": (8, (0.2, 2.6)),
-    "/sounds/thunder3.wav": (5, (1.2,)),
-    "/sounds/thunder4.wav": (9, (0.4, 1.1, 4.5)),
+    "/thunder/thunder1.wav": (6, (0.3,)),
+    "/thunder/thunder2.wav": (8, (0.2, 2.6)),
+    "/thunder/thunder3.wav": (5, (1.2,)),
+    "/thunder/thunder4.wav": (9, (0.4, 1.1, 4.5)),
 }
 _FAKE_LENGTH = {p: s for p, (s, c) in _FAKE_CLIPS.items()}
 _FAKE_LENGTH["/rain/rain1.wav"] = 20
@@ -136,7 +136,7 @@ swap("audiobusio.I2SOut(board.I2S_BIT_CLOCK, board.I2S_WORD_SELECT, board.I2S_DA
      "audiobusio.I2SOut()")
 
 # 4. fake clip lists instead of reading the drive
-swap('sounds = list_wavs("/sounds")', "sounds = sorted(_FAKE_CLIPS)")
+swap('sounds = list_wavs("/thunder")', "sounds = sorted(_FAKE_CLIPS)")
 swap('rain_sounds = list_wavs("/rain") if USE_RAIN_BUTTON else []',
      'rain_sounds = ["/rain/rain1.wav"] if USE_RAIN_BUTTON else []')
 

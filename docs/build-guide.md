@@ -66,7 +66,7 @@ No resistors or capacitors are required: the board level-shifts the LED data to 
 
 ## Software setup
 
-Install CircuitPython once, copy three library items and the code, then drop thunder WAV files in a `sounds` folder. No compiling: the board shows up as a USB drive.
+Install CircuitPython once, copy three library items and the code, then drop thunder WAV files in a `thunder` folder. No compiling: the board shows up as a USB drive.
 
 1. **Install CircuitPython (latest stable, 10.x as of Oct 2026).** Download the .UF2 for "Adafruit Feather RP2040 Prop-Maker" from [circuitpython.org](https://circuitpython.org/board/adafruit_feather_rp2040_prop_maker/). Hold the **BOOT** button, tap **RESET**, release BOOT; a drive named `RPI-RP2` appears. Drag the .UF2 onto it. The board reboots as a drive named `CIRCUITPY`.
 2. **Add libraries.** Download the bundle matching your CircuitPython version from the [Library Bundle](https://circuitpython.org/libraries) page, unzip it, and copy into `CIRCUITPY/lib`:
@@ -74,7 +74,7 @@ Install CircuitPython once, copy three library items and the code, then drop thu
    - `adafruit_lis3dh.mpy`
    - the `adafruit_bus_device` folder
 3. **Copy the code.** Put [`firmware/code.py`](../firmware/code.py) and [`firmware/safemode.py`](../firmware/safemode.py) at the root of `CIRCUITPY`, replacing the `code.py` already there. `code.py` runs automatically on every power-up; `safemode.py` restarts the board if a power dip ever knocks it into safe mode, so the cloud doesn't go dark for the night.
-4. **Add thunder sounds.** Make a folder `CIRCUITPY/sounds` and add 6–10 clips, 8–15 seconds each. Each must be **WAV, 16-bit, mono, 22,050 Hz**. In Audacity: Tracks → Mix → Mix Stereo Down to Mono, set Project Rate to 22050, then File → Export → WAV, Signed 16-bit PCM. Every file must match that format exactly or it's skipped. Keep the total under about 6 MB (roughly 2 minutes of audio). Small speakers can't reproduce deep rumble, so before exporting: high-pass at about 120 Hz, boost 200–500 Hz a little, compress, and normalize to −1 dB. A red blink 3 times at power-up means no sound files were found.
+4. **Add thunder sounds.** Make a folder `CIRCUITPY/thunder` and add 6–10 clips, 8–15 seconds each. Each must be **WAV, 16-bit, mono, 22,050 Hz**. In Audacity: Tracks → Mix → Mix Stereo Down to Mono, set Project Rate to 22050, then File → Export → WAV, Signed 16-bit PCM. Every file must match that format exactly or it's skipped. Keep the total under about 6 MB (roughly 2 minutes of audio). Small speakers can't reproduce deep rumble, so before exporting: high-pass at about 120 Hz, boost 200–500 Hz a little, compress, and normalize to −1 dB. A red blink 3 times at power-up means no sound files were found.
 5. **Choose the trigger.** Edit the settings at the top of `code.py` in any text editor (Mu or VS Code is easiest):
 
 | Setting | Button only | Pat only | Both |
@@ -121,7 +121,7 @@ Test everything on the bench before any fiberfill goes on; fixes are much harder
 | No LEDs at all | Lead on the strip's output end, or data in the wrong terminal | Check arrows; DIN goes to **Neo** |
 | LEDs stop partway | Bad joint on that segment's input | Reflow the DIN joint where it stops |
 | Random colors or flicker | Loose ground or data | Tighten **G** and **Neo**; check GND joints |
-| No thunder | WAV format wrong or no `sounds` folder | Re-export 16-bit mono 22,050 Hz; check the folder name |
+| No thunder | WAV format wrong or no `thunder` folder | Re-export 16-bit mono 22,050 Hz; check the folder name |
 | Board resets or goes dark on big flashes | Too much LED current | Lower `BRIGHTNESS` to 0.25; `safemode.py` restarts it automatically |
 | Strikes while walking | Tap too sensitive | Raise `TAP_THRESHOLD` or keep `TAP_MODE = 2` |
 | Power bank turns off when idle | Load too low between strikes | Raise `IDLE_COLOR`, e.g. to (12, 14, 36); if it still sleeps, get a Voltaic V25 (always-on USB-A ports) |
