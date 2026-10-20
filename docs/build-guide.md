@@ -50,7 +50,7 @@ Cut the strip into six 10-LED segments, chain them with short 3-wire jumpers, th
 3. **Tin the pads.** Add a small blob of solder to the three pads at both ends of each segment (only the input end on segment 1 and the output end on segment 6 are optional).
 4. **Make the jumpers.** Cut five sets of three wires (red, black, white) as long as the gap you want between zones, typically 6–12 in. Strip and tin about 3 mm on each end.
 5. **Chain the segments.** Solder each segment's **DOUT → next DIN**, **5V → 5V**, **GND → GND**. Data must always flow in the arrow direction. Slide heat-shrink over each joint before soldering, then shrink it.
-6. **Lead to the board.** Solder a 3-wire lead (under 1–2 m) to segment 1's input: **DIN → Neo**, **5V → 5V**, **GND → G**. Add a JST-SM pigtail in this lead if you want the cloud to unplug.
+6. **Lead to the board.** Solder a 3-wire lead (under about 1 m) to segment 1's input: **DIN → Neo**, **5V → 5V**, **GND → G**. Add a JST-SM pigtail in this lead if you want the cloud to unplug.
 7. **Speaker.** Solder wire to the speaker tabs if it has none, then screw into **+** and **−**. Polarity doesn't matter, but never connect either speaker wire to G or any ground: the amp drives both wires.
 8. **Red button.** Solder two wires to the button, long enough to reach a pocket. Screw one into **Btn** and the other into **G** (it shares the LED ground terminal; twist the two ground wires together or tin them as one before tightening).
 9. **Power.** Plug the power bank's USB-C cable into the board's USB-C port. That's the only power connection.
@@ -59,6 +59,19 @@ Cut the strip into six 10-LED segments, chain them with short 3-wire jumpers, th
 ![Segment joint close-up: cut line, DO to DIN, 5V to 5V, GND to GND](images/segment-joint.png)
 
 DO on one segment always connects to DIN on the next. If a segment stays dark during the bench test, check that joint's direction first.
+
+**Wire lengths.** Most runs can be any reasonable length, but the data wire is sensitive.
+
+| Wire | Keep it under | What goes wrong if it's too long |
+| --- | --- | --- |
+| Data (Neo → strip DIN) | about 1 m | First LED or two show random colors, the rest stay dark |
+| Between strip segments (data, 5V, ground) | about 30–50 cm each | A segment, and every one after it, glitches or stays dark |
+| 5V and ground to the strip | as short as the costume allows; use 22 AWG or thicker | Far LEDs go dim or orange, or the board resets on big flashes |
+| USB-C cable from the power bank | about 1 m; a decent, not bargain, cable | Voltage drops under load and the board resets |
+| Speaker | no real limit | Nothing at this scale |
+| Buttons | 1–2 m is fine | Rarely, strikes nobody triggered (twist the pair to fix) |
+
+Run the ground wire right next to the data wire, twisted together if you can.
 
 **Optional: green rain button.** A second momentary button turns rain on and off. The screw terminal has only one button input, so solder this button's two wires to the **A0** pad and any **GND** pad on the board's edge (the row of labeled holes). Then set `USE_RAIN_BUTTON = True` in `code.py`.
 
